@@ -1,7 +1,11 @@
 package br.com.caelum.ingresso.controller;
 
 import br.com.caelum.ingresso.dao.FilmeDao;
+import br.com.caelum.ingresso.dao.SessaoDao;
 import br.com.caelum.ingresso.model.Filme;
+import br.com.caelum.ingresso.model.Sessao;
+
+import org.dom4j.rule.Mode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
+
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -20,6 +26,8 @@ public class FilmeController {
 
 	@Autowired
 	private FilmeDao filmeDao;
+	@Autowired
+	private SessaoDao sessaoDao;
 
 	@GetMapping({ "/admin/filme", "/admin/filme/{id}" })
 	public ModelAndView form(@PathVariable("id") Optional<Integer> id, Filme filme) {
@@ -66,5 +74,22 @@ public class FilmeController {
 	public void delete(@PathVariable("id") Integer id) {
 		filmeDao.delete(id);
 	}
+	@GetMapping
+	public ModelAndView emCartaz() {
+		ModelAndView model = new ModelAndView("filmes/em-cartaz");
+		model.addObject("filmes", filmeDao.findAll());
+		
+		return model;
+	}
+	@GetMapping("filme/{id}/detalhe")
+	public ModelAndView detalhes(@PathVariable("id") Integer id) {
+		ModelAndView modelAndView = new ModelAndView("/filme/detalhe");
+		Filme filme = filmeDao.findOne(id);
+		List<Sessao> sessoes = sessaoDao.buscarSessoesDoFilme(filme);
+		modelAndView.addObject("sessoes", sessoes);
+		
+		return modelAndView;
+	}
+	
 
 }
