@@ -2,10 +2,11 @@ package br.com.caelum.ingresso.controller;
 
 import br.com.caelum.ingresso.dao.FilmeDao;
 import br.com.caelum.ingresso.dao.SessaoDao;
+import br.com.caelum.ingresso.model.DetalhesDoFilme;
 import br.com.caelum.ingresso.model.Filme;
 import br.com.caelum.ingresso.model.Sessao;
-
-import org.dom4j.rule.Mode;
+import br.com.caelum.ingresso.rest.OmdbClient;
+ 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,8 @@ public class FilmeController {
 	private FilmeDao filmeDao;
 	@Autowired
 	private SessaoDao sessaoDao;
+	@Autowired
+	private OmdbClient client;
 
 	@GetMapping({ "/admin/filme", "/admin/filme/{id}" })
 	public ModelAndView form(@PathVariable("id") Optional<Integer> id, Filme filme) {
@@ -74,9 +77,9 @@ public class FilmeController {
 	public void delete(@PathVariable("id") Integer id) {
 		filmeDao.delete(id);
 	}
-	@GetMapping
+	@GetMapping("/filme/em-cartaz")
 	public ModelAndView emCartaz() {
-		ModelAndView model = new ModelAndView("filmes/em-cartaz");
+		ModelAndView model = new ModelAndView("filme/em-cartaz");
 		model.addObject("filmes", filmeDao.findAll());
 		
 		return model;
@@ -86,7 +89,10 @@ public class FilmeController {
 		ModelAndView modelAndView = new ModelAndView("/filme/detalhe");
 		Filme filme = filmeDao.findOne(id);
 		List<Sessao> sessoes = sessaoDao.buscarSessoesDoFilme(filme);
+		Optional<DetalhesDoFilme> detalhesDoFilme = client.resquest(filme, DetalhesDoFilme.class);
 		modelAndView.addObject("sessoes", sessoes);
+		modelAndView.addObject("detalhes", detalhesDoFilme.orElse(new DetalhesDoFilme()));
+		
 		
 		return modelAndView;
 	}
