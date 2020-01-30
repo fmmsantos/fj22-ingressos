@@ -13,4 +13,10 @@ public class SemDesconto implements Desconto {
 		
 	}
 
+	@Override
+	public String getDescricao() {
+		// TODO Auto-generated method stub
+		return "Normal";
+	}
+
 }
